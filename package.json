@@ -1,0 +1,61 @@
+{
+  "name": "@org/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "migration:run": "npx tsx -e \"require('dotenv/config')\" node_modules/typeorm/cli.js migration:run --dataSource libs/shared/database/typeorm.config.ts",
+    "migration:revert": "npx tsx -e \"require('dotenv/config')\" node_modules/typeorm/cli.js migration:revert --dataSource libs/shared/database/typeorm.config.ts"
+  },
+  "private": true,
+  "devDependencies": {
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@nx/js": "23.0.1",
+    "@nx/nest": "^23.0.1",
+    "@nx/next": "^23.0.1",
+    "@nx/node": "23.0.1",
+    "@nx/web": "23.0.1",
+    "@nx/webpack": "23.0.1",
+    "@swc-node/register": "1.11.1",
+    "@swc/cli": "~0.8.0",
+    "@swc/core": "1.15.8",
+    "@swc/helpers": "0.5.18",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^24.0.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "nx": "23.0.1",
+    "prettier": "^3.8.1",
+    "tslib": "^2.3.0",
+    "typescript": "~6.0.3",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^7.0.0",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/microservices": "^11.1.27",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/typeorm": "^11.0.3",
+    "bcryptjs": "^3.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "next": "~16.1.6",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.22.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0",
+    "typeorm": "^1.0.0"
+  }
+}

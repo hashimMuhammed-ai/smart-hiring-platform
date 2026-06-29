@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["@org/source"],
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@app/shared/dto": ["libs/shared/dto/src/index.ts"],
+      "@app/shared/types": ["libs/shared/types/src/index.ts"],
+      "@app/shared/constants": ["libs/shared/constants/src/index.ts"],
+      "@app/shared/database": ["libs/shared/database/src/index.ts"]
+    }
+  }
+}

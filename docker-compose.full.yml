@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: smart-hiring-postgres
+    environment:
+      POSTGRES_DB: smart_hiring
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: smart-hiring-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: smart-hiring-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: supersecretjwtkey
+      RESUME_SERVICE_HOST: resume-service
+      RESUME_SERVICE_PORT: 3001
+      MATCHING_SERVICE_HOST: matching-service
+      MATCHING_SERVICE_PORT: 3002
+      PIPELINE_SERVICE_HOST: pipeline-service
+      PIPELINE_SERVICE_PORT: 3003
+      NOTIFICATION_SERVICE_PORT: 3004
+      NODE_ENV: development
+    depends_on:
+      - postgres
+      - redis
+
+  resume-service:
+    build:
+      context: .
+      dockerfile: apps/resume-service/Dockerfile
+    container_name: smart-hiring-resume-service
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
+      REDIS_URL: redis://redis:6379
+      RESUME_SERVICE_PORT: 3001
+    depends_on:
+      - postgres
+      - redis
+
+  matching-service:
+    build:
+      context: .
+      dockerfile: apps/matching-service/Dockerfile
+    container_name: smart-hiring-matching-service
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
+      REDIS_URL: redis://redis:6379
+      MATCHING_SERVICE_PORT: 3002
+    depends_on:
+      - postgres
+      - redis
+
+  pipeline-service:
+    build:
+      context: .
+      dockerfile: apps/pipeline-service/Dockerfile
+    container_name: smart-hiring-pipeline-service
+    ports:
+      - "3003:3003"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
+      REDIS_URL: redis://redis:6379
+      PIPELINE_SERVICE_PORT: 3003
+    depends_on:
+      - postgres
+      - redis
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    container_name: smart-hiring-notification-service
+    ports:
+      - "3004:3004"
+    environment:
+      DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
+      REDIS_URL: redis://redis:6379
+      NOTIFICATION_SERVICE_PORT: 3004
+    depends_on:
+      - postgres
+      - redis
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: smart-hiring-web
+    ports:
+      - "3005:3005"
+    environment:
+      NEXT_PUBLIC_API_URL: http://api-gateway:3000
+    depends_on:
+      - api-gateway
+
+volumes:
+  postgres_data:
+  redis_data:

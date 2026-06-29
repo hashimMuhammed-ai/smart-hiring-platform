@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/api-gateway"
+    },
+    {
+      "path": "./apps/resume-service"
+    },
+    {
+      "path": "./apps/matching-service"
+    },
+    {
+      "path": "./apps/pipeline-service"
+    },
+    {
+      "path": "./apps/notification-service"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./libs/shared/dto"
+    },
+    {
+      "path": "./libs/shared/types"
+    },
+    {
+      "path": "./libs/shared/constants"
+    },
+    {
+      "path": "./libs/shared/database"
+    }
+  ]
+}
