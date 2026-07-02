@@ -26,7 +26,8 @@
       "@app/shared/dto": ["libs/shared/dto/src/index.ts"],
       "@app/shared/types": ["libs/shared/types/src/index.ts"],
       "@app/shared/constants": ["libs/shared/constants/src/index.ts"],
-      "@app/shared/database": ["libs/shared/database/src/index.ts"]
+      "@app/shared/database": ["libs/shared/database/src/index.ts"],
+      "@app/shared/langchain": ["libs/shared/langchain/src/index.ts"]
     }
   }
 }

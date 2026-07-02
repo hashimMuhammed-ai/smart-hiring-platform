@@ -10,5 +10,16 @@
     "target": "es2021"
   },
   "include": ["src/**/*.ts"],
-  "exclude": []
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "references": [
+    {
+      "path": "../../libs/shared/constants/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/shared/database/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/shared/langchain/tsconfig.lib.json"
+    }
+  ]
 }

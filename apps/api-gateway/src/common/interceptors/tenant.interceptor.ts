@@ -5,7 +5,7 @@ import {
   CallHandler,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { AuthenticatedUser } from '../../auth/strategies/jwt.strategy.js';
+import type { AuthenticatedUser } from '../types/auth.types.js';
 
 interface RequestWithTenant {
   user?: AuthenticatedUser;

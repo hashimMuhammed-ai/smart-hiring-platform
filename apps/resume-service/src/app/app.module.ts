@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ResumeModule } from '../resume/resume.module.js';
 
-/**
- * Root module for the Resume Service TCP microservice.
- * Feature modules (ResumeModule) will be added in Sprint 2.
- */
 @Module({
-  imports: [],
+  imports: [ResumeModule],
   controllers: [],
   providers: [],
 })

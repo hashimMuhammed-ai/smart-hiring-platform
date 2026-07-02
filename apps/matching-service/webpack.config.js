@@ -1,5 +1,8 @@
 const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
-const { join } = require('path');
+const { join, resolve } = require('path');
+
+// Root of the monorepo
+const root = resolve(__dirname, '..', '..');
 
 module.exports = {
   output: {
@@ -9,10 +12,19 @@ module.exports = {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
     }),
   },
+  resolve: {
+    alias: {
+      '@app/shared/database': resolve(root, 'libs/shared/database/src/index.ts'),
+      '@app/shared/types':    resolve(root, 'libs/shared/types/src/index.ts'),
+      '@app/shared/dto':      resolve(root, 'libs/shared/dto/src/index.ts'),
+      '@app/shared/constants':resolve(root, 'libs/shared/constants/src/index.ts'),
+      '@app/shared/langchain':resolve(root, 'libs/shared/langchain/src/index.ts'),
+    },
+  },
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',
-      compiler: 'tsc',
+      compiler: 'swc',
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
       assets: ['./src/assets'],

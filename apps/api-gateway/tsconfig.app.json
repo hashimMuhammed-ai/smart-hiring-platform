@@ -3,14 +3,14 @@
   "compilerOptions": {
     "outDir": "dist",
     "types": ["node"],
-    "rootDir": "src",
+    "composite": false,
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2021"
   },
   "include": ["src/**/*.ts"],
-  "exclude": [],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
   "references": [
     {
       "path": "../../libs/shared/types/tsconfig.lib.json"

@@ -44,6 +44,10 @@
     }
   ],
   "analytics": false,
+  "sync": {
+    "applyChanges": true,
+    "disabledGenerators": ["@nx/js:typescript-sync"]
+  },
   "generators": {
     "@nx/next": {
       "application": {
