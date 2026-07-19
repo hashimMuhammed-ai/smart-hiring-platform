@@ -35,6 +35,12 @@
     },
     {
       "path": "./libs/shared/langchain"
+    },
+    {
+      "path": "./apps/combined-e2e"
+    },
+    {
+      "path": "./apps/combined"
     }
   ]
 }

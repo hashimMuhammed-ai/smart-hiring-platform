@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      useFactory: () => {
-        const databaseUrl = process.env.DATABASE_URL;
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
         if (!databaseUrl) {
           throw new Error('DATABASE_URL environment variable is not defined');
         }

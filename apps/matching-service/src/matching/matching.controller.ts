@@ -1,7 +1,12 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { MatchingService } from './matching.service.js';
-import type { JobEmbedPayload, JobEmbedResult } from './matching.types.js';
+import type {
+  JobEmbedPayload,
+  JobEmbedResult,
+  JobMatchPayload,
+  CandidateMatchResult,
+} from './matching.types.js';
 
 interface TcpResponse<T> {
   data: T | null;
@@ -29,6 +34,28 @@ export class MatchingController {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       this.logger.error('job.embed handler failed', {
+        error: message,
+        context: { tenantId: payload.tenantId, jobId: payload.jobId },
+      });
+      return { data: null, error: message };
+    }
+  }
+
+  /**
+   * Handles the `job.match` TCP message sent by the API Gateway.
+   * Runs the full similarity search, scoring, persistence, and returns
+   * the ranked matches.
+   */
+  @MessagePattern('job.match')
+  async handleJobMatch(
+    @Payload() payload: JobMatchPayload,
+  ): Promise<TcpResponse<CandidateMatchResult>> {
+    try {
+      const data = await this.matchingService.matchJob(payload);
+      return { data, error: null };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      this.logger.error('job.match handler failed', {
         error: message,
         context: { tenantId: payload.tenantId, jobId: payload.jobId },
       });

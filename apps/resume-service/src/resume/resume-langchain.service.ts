@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ChatOpenAI } from '@langchain/openai';
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { LANGCHAIN_LLM } from '@app/shared/langchain';
 import { R2Service } from '../r2/r2.service.js';
 import { RESUME_EXTRACTION_PROMPT } from './prompts/resume-extraction.prompt.js';
 import { ParsedResumeDataSchema, ParsedResumeData } from './resume.types.js';
@@ -14,7 +15,7 @@ export class ResumeLangChainService implements OnModuleInit {
 
   constructor(
     private readonly r2Service: R2Service,
-    private readonly model: ChatOpenAI,
+    @Inject(LANGCHAIN_LLM) private readonly model: ChatGoogleGenerativeAI,
   ) { }
 
   onModuleInit(): void {

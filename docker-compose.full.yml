@@ -56,6 +56,15 @@ services:
     environment:
       DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
       REDIS_URL: redis://redis:6379
+      R2_ACCOUNT_ID: 
+      R2_ACCESS_KEY_ID: 
+      R2_SECRET_ACCESS_KEY: 
+      R2_BUCKET_NAME: smart-hiring-resumes
+      R2_PUBLIC_URL: https://dummy-public-url.com
+      GOOGLE_API_KEY: 
+      GEMINI_CHAT_MODEL: gemini-2.5-flash
+      GEMINI_EMBEDDING_MODEL: gemini-embedding-2
+      EMBEDDING_DIMENSIONS: 1536
       RESUME_SERVICE_PORT: 3001
     depends_on:
       - postgres
@@ -71,6 +80,10 @@ services:
     environment:
       DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
       REDIS_URL: redis://redis:6379
+      GOOGLE_API_KEY:
+      GEMINI_CHAT_MODEL: gemini-2.5-flash
+      GEMINI_EMBEDDING_MODEL: gemini-embedding-2
+      EMBEDDING_DIMENSIONS: 1536
       MATCHING_SERVICE_PORT: 3002
     depends_on:
       - postgres
@@ -101,6 +114,12 @@ services:
     environment:
       DATABASE_URL: postgresql://user:pass@postgres:5432/smart_hiring
       REDIS_URL: redis://redis:6379
+      SMTP_HOST: smtp-relay.brevo.com
+      SMTP_PORT: 465
+      SMTP_USER: b2b865001@smtp-brevo.com
+      SMTP_PASS: 
+      EMAIL_FROM: outboundcalling213@gmail.com
+      BREVO_API_KEY: 
       NOTIFICATION_SERVICE_PORT: 3004
     depends_on:
       - postgres

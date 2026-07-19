@@ -2,8 +2,10 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Next.js options go here
-  // See: https://nextjs.org/docs/app/api-reference/config/next-config-js
+  // Turbopack is the default in Next.js 16.
+  // TypeScript path aliases (@/* → src/*) are defined in tsconfig.json
+  // and are automatically resolved by Turbopack — no additional config needed.
+  turbopack: {},
 };
 
 module.exports = nextConfig;

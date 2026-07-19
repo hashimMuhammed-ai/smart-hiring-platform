@@ -1,36 +1,48 @@
 import { Module } from '@nestjs/common';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
+import { TaskType } from '@google/generative-ai';
+
+export const LANGCHAIN_LLM = Symbol('LANGCHAIN_LLM');
+export const LANGCHAIN_EMBEDDINGS = Symbol('LANGCHAIN_EMBEDDINGS');
 
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
-      provide: ChatOpenAI,
-      useFactory: () => {
-        const apiKey = process.env.OPENAI_API_KEY;
-        if (!apiKey) {
-          throw new Error('OPENAI_API_KEY environment variable is not defined');
-        }
-        return new ChatOpenAI({
-          openAIApiKey: apiKey,
-          modelName: 'gpt-4o-mini',
-          temperature: 0,
-        });
-      },
+      provide: LANGCHAIN_LLM,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        new ChatGoogleGenerativeAI({
+          apiKey: config.getOrThrow('GOOGLE_API_KEY'),
+          model: config.get('GEMINI_CHAT_MODEL', 'gemini-2.5-flash'),
+          temperature: 0.1, // low temp for structured extraction
+        }),
     },
     {
-      provide: OpenAIEmbeddings,
-      useFactory: () => {
-        const apiKey = process.env.OPENAI_API_KEY;
-        if (!apiKey) {
-          throw new Error('OPENAI_API_KEY environment variable is not defined');
-        }
-        return new OpenAIEmbeddings({
-          openAIApiKey: apiKey,
-          modelName: 'text-embedding-3-small',
+      provide: LANGCHAIN_EMBEDDINGS,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const embeddings = new GoogleGenerativeAIEmbeddings({
+          apiKey: config.getOrThrow('GOOGLE_API_KEY'),
+          model: config.get('GEMINI_EMBEDDING_MODEL', 'gemini-embedding-2'),
+          taskType: TaskType.RETRIEVAL_DOCUMENT,
         });
+
+        // Dynamically override private method on instance to bypass TS private override restrictions
+        const originalConvert = (embeddings as any)._convertToContent.bind(embeddings);
+        (embeddings as any)._convertToContent = (text: string) => {
+          const base = originalConvert(text);
+          return {
+            ...base,
+            outputDimensionality: 1536,
+          };
+        };
+
+        return embeddings;
       },
     },
   ],
-  exports: [ChatOpenAI, OpenAIEmbeddings],
+  exports: [LANGCHAIN_LLM, LANGCHAIN_EMBEDDINGS],
 })
-export class LangChainModule {}
+export class LangChainModule { }

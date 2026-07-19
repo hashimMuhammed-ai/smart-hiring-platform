@@ -1,8 +1,9 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { QUEUE_RESUME_PARSE } from '@app/shared/constants';
-import { OpenAIEmbeddings } from '@app/shared/langchain';
+import { LANGCHAIN_EMBEDDINGS } from '@app/shared/langchain';
+import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { ResumeLangChainService } from '../resume/resume-langchain.service.js';
 import { CandidateRepository } from '../resume/candidate.repository.js';
 
@@ -12,7 +13,8 @@ export class ResumeParseProcessor extends WorkerHost {
 
   constructor(
     private readonly resumeLangChainService: ResumeLangChainService,
-    private readonly openaiEmbeddings: OpenAIEmbeddings,
+    @Inject(LANGCHAIN_EMBEDDINGS)
+    private readonly embeddings: GoogleGenerativeAIEmbeddings,
     private readonly candidateRepository: CandidateRepository,
   ) {
     super();
@@ -45,7 +47,7 @@ export class ResumeParseProcessor extends WorkerHost {
       const textToEmbed = `${summary} ${skills}`.trim() || 'resume';
 
       this.logger.log(`[Job ${job.id}] Generating embeddings for candidate ${candidateId}`);
-      const embeddingArray = await this.openaiEmbeddings.embedQuery(textToEmbed);
+      const embeddingArray = await this.embeddings.embedQuery(textToEmbed);
 
       // Convert array of numbers into pgvector string representation: "[0.123, -0.456, ...]"
       const embeddingString = `[${embeddingArray.join(',')}]`;

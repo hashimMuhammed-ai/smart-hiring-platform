@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"],
+    "rootDir": "src",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "es2021"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": [],
+  "references": [
+    {
+      "path": "../notification-service/tsconfig.app.json"
+    },
+    {
+      "path": "../pipeline-service/tsconfig.app.json"
+    },
+    {
+      "path": "../matching-service/tsconfig.app.json"
+    },
+    {
+      "path": "../resume-service/tsconfig.app.json"
+    },
+    {
+      "path": "../api-gateway/tsconfig.app.json"
+    }
+  ]
+}

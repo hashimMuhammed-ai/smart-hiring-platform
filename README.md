@@ -1,109 +1,181 @@
-# New Nx Repository
+# SmartHire — AI-Powered Hiring Platform
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+> A multi-tenant, microservices-based hiring platform that uses AI to parse resumes, rank candidates, and manage the hiring pipeline — built with NestJS, Next.js, and pgvector.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Architecture
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/docs/technologies/typescript/introduction?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+```mermaid
+graph TD
+    Browser["Next.js 16\n(App Router)"]
+    GW["API Gateway\n:3000"]
+    RS["Resume Service\n:3001"]
+    MS["Matching Service\n:3002"]
+    PS["Pipeline Service\n:3003"]
+    NS["Notification Service\n:3004"]
+    DB[("PostgreSQL\n+ pgvector")]
+    R2["Cloudflare R2\n(PDF storage)"]
+    BQ["BullMQ\n(Redis)"]
+    OAI["OpenAI API"]
 
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/get-started). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
-
-## Generate a library
-
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+    Browser -- "REST + JWT" --> GW
+    GW -- "TCP (NestJS)" --> RS
+    GW -- "TCP (NestJS)" --> MS
+    GW -- "TCP (NestJS)" --> PS
+    GW -- "BullMQ" --> BQ
+    RS -- "SQL (TypeORM)" --> DB
+    MS -- "pgvector similarity" --> DB
+    MS -- "embeddings" --> OAI
+    PS -- "SQL (TypeORM)" --> DB
+    BQ --> NS
+    RS -- "PDF download" --> R2
 ```
 
-## Run tasks
+## Features
 
-To build the library use:
+| Feature | Description |
+|---------|-------------|
+| **Multi-tenant auth** | JWT with tenant scoping — every query is isolated by `tenantId` |
+| **Job management** | Create/edit/close jobs; JD embeddings generated asynchronously |
+| **Resume upload** | Drag-and-drop PDF bulk upload; async parsing via BullMQ |
+| **AI matching** | pgvector cosine similarity ranks candidates against job description |
+| **Pipeline kanban** | 6-stage drag-and-drop board with optimistic updates |
+| **Candidate slide-over** | Full parsed data, match score, stage history timeline |
+| **Toast notifications** | Real-time feedback for every async action |
+| **Mobile responsive** | Sidebar collapses to hamburger menu on ≤ 768 px |
 
-```sh
-npx nx run pkg1:build
-```
-
-To run any task with Nx use:
-
-```sh
-npx nx run <project-name>:<target>
-```
-
-These targets are either [inferred automatically](https://nx.dev/docs/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/docs/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## Monorepo structure
 
 ```
-npx nx release
+smart-hiring-platform/
+├── apps/
+│   ├── web/                  # Next.js 16 frontend
+│   ├── api-gateway/          # NestJS — REST entry point
+│   ├── resume-service/       # NestJS — PDF parse + R2 upload
+│   ├── matching-service/     # NestJS — pgvector embeddings + ranking
+│   ├── pipeline-service/     # NestJS — stage transitions + history
+│   └── notification-service/ # NestJS — BullMQ email consumer
+├── docs/
+│   ├── api.md                # Full REST + TCP API reference
+│   ├── architecture.md       # Service responsibilities + data flows
+│   ├── database.md           # Schema, indexes, RLS policies
+│   ├── frontend.md           # Next.js conventions + state management
+│   └── TechDecisions.md      # Why each technology was chosen
+└── nx.json
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## Prerequisites
 
-[Learn more about Nx release &raquo;](https://nx.dev/docs/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Tool | Version |
+|------|---------|
+| Node.js | ≥ 20 |
+| Docker + Docker Compose | ≥ 24 |
+| pnpm / npm | any |
 
-## Keep TypeScript project references up to date
+## Local setup
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+### 1. Clone and install
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```bash
+git clone https://github.com/your-org/smart-hiring-platform.git
+cd smart-hiring-platform
+npm install
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+### 2. Environment variables
 
-```sh
-npx nx sync:check
+Copy the example env file for each service:
+
+```bash
+cp apps/api-gateway/.env.example      apps/api-gateway/.env
+cp apps/resume-service/.env.example   apps/resume-service/.env
+cp apps/matching-service/.env.example apps/matching-service/.env
+cp apps/pipeline-service/.env.example apps/pipeline-service/.env
+cp apps/web/.env.local.example        apps/web/.env.local
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+Key variables:
 
-## Nx Cloud
+| Variable | Service | Description |
+|----------|---------|-------------|
+| `DATABASE_URL` | all services | PostgreSQL connection string |
+| `REDIS_URL` | api-gateway, notification-service | BullMQ broker |
+| `OPENAI_API_KEY` | matching-service | Used for JD + resume embeddings |
+| `R2_ACCOUNT_ID` | resume-service | Cloudflare R2 for PDF storage |
+| `R2_ACCESS_KEY_ID` | resume-service | |
+| `R2_SECRET_ACCESS_KEY` | resume-service | |
+| `R2_BUCKET` | resume-service | |
+| `JWT_SECRET` | api-gateway | HS256 signing key |
+| `NEXT_PUBLIC_API_URL` | web | Points to api-gateway (default: `http://localhost:3000/api`) |
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+### 3. Start infrastructure
 
-- [Remote caching](https://nx.dev/docs/features/ci-features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/docs/features/ci-features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/docs/features/ci-features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/docs/features/ci-features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+```bash
+docker compose up -d   # starts PostgreSQL + Redis
 ```
 
-[Learn more about Nx on CI](https://nx.dev/docs/features/ci-features?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### 4. Run database migrations
 
-## Install Nx Console
+```bash
+npm run migration:run
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### 5. Start all services
 
-[Install Nx Console &raquo;](https://nx.dev/docs/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# In separate terminals (or use --parallel):
+npx nx serve api-gateway
+npx nx serve resume-service
+npx nx serve matching-service
+npx nx serve pipeline-service
+npx nx serve notification-service
+npx nx serve web
+```
 
-## 🔗 Learn More
+Or all at once:
 
-- [Nx Documentation](https://nx.dev/docs)
-- [Crafting Your Workspace Tutorial](https://nx.dev/docs/getting-started/tutorials/crafting-your-workspace)
-- [Module Boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
-- [Releasing Packages](https://nx.dev/docs/features/manage-releases)
-- [Nx Plugins](https://nx.dev/docs/concepts/nx-plugins)
-- [Nx Cloud](https://nx.dev/nx-cloud)
+```bash
+npx nx run-many --target=serve --all --parallel=6
+```
 
-## 💬 Community
+The frontend is available at **http://localhost:4200**.
 
-Join the Nx community:
+## Key workflows
 
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+### Upload resumes and run AI match
+
+1. Create a job at `/jobs/new`
+2. Click **Upload resumes** → drag PDFs → watch per-file parse status
+3. Once all resumes show **done**, click **✦ Run AI match**
+4. Candidates re-rank by match score — click any row to open the slide-over
+
+### Move a candidate through the pipeline
+
+1. Navigate to `/jobs/:id/pipeline`
+2. Drag a candidate card to a new column
+3. The stage updates optimistically; a success toast confirms the API call
+4. If the API fails, the card snaps back to its original column and an error toast appears
+5. The pipeline service publishes to BullMQ → notification service emails the candidate
+
+## API reference
+
+Full REST + TCP message patterns: [`docs/api.md`](docs/api.md)
+
+## Tech decisions
+
+Why TypeORM, why pgvector, why BullMQ — all documented in [`docs/TechDecisions.md`](docs/TechDecisions.md)
+
+## Running tests
+
+```bash
+npx nx test api-gateway
+npx nx test resume-service
+npx nx test matching-service
+```
+
+## Building for production
+
+```bash
+npx nx build web
+npx nx build api-gateway
+# (repeat for each service)
+```

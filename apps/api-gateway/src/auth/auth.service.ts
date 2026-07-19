@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -79,5 +79,13 @@ export class AuthService {
       accessToken,
       user: { id: user.id, email: user.email, role: user.role },
     };
+  }
+
+  async getTenant(tenantId: string): Promise<Tenant> {
+    const tenant = await this.tenantRepo.findOne({ where: { id: tenantId } });
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
+    return tenant;
   }
 }
